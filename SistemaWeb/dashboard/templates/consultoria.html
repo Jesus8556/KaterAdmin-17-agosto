@@ -1,0 +1,119 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Consultoria</h1>
+    <p class="mb-4">Informacion de los cursos de Consultoria</p>
+    <a href="{% url 'nueva_consultoria' %}" class="btn btn-primary btn-icon-split">
+        <span class="icon text-white-50">
+            <i class="fas fa-flag"></i>
+        </span>
+        <span class="text">Nuevo curso</span>
+    </a>
+    <br>
+    <br>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Detalles</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Codigo</th>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+                        
+                        {% for consultoria in consultorias %}
+                        <tr>
+                            
+                            <td>{{consultoria.codigo}}</td>
+                            <td>{{consultoria.nombre}}</td>
+                            <td>{{consultoria.descripcion}}</td>
+                            <td>S/.{{consultoria.precio_unitario}}</td>
+                            
+                            <td>
+                                <!-- Icono para editar -->
+                                <a href="{% url 'editar_consultoria' consultoria.id %}" class="btn btn-warning btn-circle">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <!-- Icono para eliminar -->
+                                <a href="{% url 'eliminar_consultoria' consultoria.id %}"
+                                    class="btn btn-danger btn-circle eliminar-consultoria">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                            
+                         
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    $(document).ready(function () {
+        // Función para manejar el clic en el botón de eliminar
+        $('.eliminar-consultoria').click(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+            // Mostrar cuadro de diálogo de confirmación antes de eliminar
+            if (confirm('¿Estás seguro de que deseas eliminar esta consultoria?')) {
+                // Obtener la URL de eliminación del vendedor desde el atributo "href" del enlace
+                var url = $(this).attr('href');
+
+                // Enviar la solicitud AJAX para eliminar el vendedor
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',  // Incluir el token CSRF en la solicitud
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        // Si la eliminación fue exitosa, actualizamos la tabla eliminando la fila
+                        $(event.target).closest('tr').remove();
+                        alert(data.message); // Mostrar un mensaje de éxito
+                    },
+                    error: function (error) {
+                        console.log(error); // Mostrar cualquier error en la consola
+                        alert('Error al eliminar la cosultoria'); // Mostrar un mensaje de error
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+            }
+        });
+    });
+</script>
+
+
+
+
+{% endblock %}

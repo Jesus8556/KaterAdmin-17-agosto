@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<style>
+    .img-invoice {
+        width: 100px;
+        text-align: left;
+        margin: 0 auto;
+    }
+
+    .img-invoice-firma {
+        width: 1000px;
+        text-align: left;
+        margin: 0 auto;
+    }
+
+    .img-invoice-cuenta {
+        width: 1000px;
+        text-align: right;
+    }
+
+    .head {
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    #invoice thead tr th {
+        text-align: left;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+        padding-top: 4px;
+    }
+
+    #invoice thead tr {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    #invoice tbody tr {
+        padding: 0;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+    @page{
+        size: a4 portrait;
+        @frame header_frame {
+            -pdf-frame-content:header_content;
+            left: 60pt;
+            width: 512pt;
+            top:40pt;
+            height: 50pt;
+        }
+        @frame content_frame{
+            left: 50pt;
+            width: 512pt;
+            top: 90pt;
+            height: 620pt;
+        }
+        @frame footer_frame {
+            -pdf-frame-content:footer_content;
+            left: 60pt;
+            width: 512pt;
+            top: 779pt;
+            height: 50pt;
+        }
+        
+
+    }
+</style>
+
+<body>
+    <div id="header_content">
+        <img src="{% static 'imgPiezas/LOGO_WEB.png'%}" class="img-invoice">
+
+    </div>
+    <table style="margin-top: 250px;">
+
+    </table>
+    <h1 class="head">
+        {{ cotizacion.proforma|upper }}<br>
+
+    </h1>
+    <table style="margin-top: 25px;">
+        <thead>
+            <tr>
+                <th>ORDEN DE PROFORMA </th>
+                <th>
+                <th> {{ cotizacion.proforma|upper }}</th>
+                </th>
+            </tr>
+            <tr>
+                <th style="border-top: 1px solid black; padding-top: 4px;text-align: left center">
+                    <p>
+                        <br>
+                        <b>FECHA: </b> {{ cotizacion.proforma.fecha }}<br>
+                        <b>BU: </b> {{ cotizacion.proforma.bu }}<br>
+                        <b>CONDICION DE PAGO: </b> {{ cotizacion.proforma.condicion_pago }}<br>
+                        <b>MONEDA: </b> {{ cotizacion.proforma.moneda }}<br>
+                        <b>VALIDEZ DE O/P: </b> {{ cotizacion.proforma.validez }}<br>
+                        <b>VENDEDOR: </b> {{ cotizacion.proforma.vendedor }}<br>
+                        <b>CORREO: </b> {{ cotizacion.proforma.correo }}<br>
+                        <b>CELULAR: </b> {{ cotizacion.proforma.celular }}<br><br><br>
+                    </p>
+                </th>
+                <th>
+                <th style="border-top: 1px solid black; padding-top: 4px;text-align: left center">
+                    <p>
+
+                        <b>ATENCION: </b> {{ cotizacion.cliente.atencion }}<br>
+                        <b>CLIENTE: </b> {{ cotizacion.cliente.cliente }}<br>
+                        <b>RUC_DNI: </b>{{cotizacion.cliente.ruc_dni}} <br>
+                        <b>DIRECCION: </b> {% for direccion in cotizacion.cliente.get_direcciones %}
+                        {{ direccion.direccion }}<br>
+                        {% empty %}
+                        Sin direcciones
+                        {% endfor %}<br>
+                        <b>TELEFONO: </b> {{cotizacion.cliente.telefono}}<br>
+                        <b>CORREO: </b> {{cotizacion.cliente.correo}}<br>
+                        <b>OBS: </b>{{cotizacion.cliente.observacion}}<br><br><br>
+                    </p>
+
+
+                </th>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <p>
+        <br>
+        <b>Actividad: </b> {{ cotizacion.proforma.actividad|upper }}<br><br>
+        <b>OBS: </b> {{ cotizacion.proforma.observacion|upper }}<br>
+    </p>
+    <br>
+
+    <table id="invoice">
+        <thead>
+            <tr>
+                <th align="center" style="width: 10%;">ITEM</th>
+                <th align="center" style="width: 20%;">CANTIDAD</th>
+                <th align="center" style="width: 25%;">CODIGO</th>
+                <th align="center" style="width: 75%;">DESCRIPCION </th>
+                <th align="center" style="width: 25%;">P_UNITARIO</th>
+                <th align="center" style="width: 30%;">DESCUENTO</th>
+                <th align="center" style="width: 20%;">TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles %}
+            <!-- Contenido de la tabla -->
+            <tr style="padding-top: 3px;">
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td class="text-center">{{ detalle.cantidad}}</td>
+
+                <td class="text-center">{{detalle.codigo}}</td>
+                <td>{{detalle.descripcion}}</td>
+                <td class="text-center">{{detalle.precio_unitario}}</td>
+                {% if detalle.descuento_tipo|stringformat:"s" == 'porcentaje' %}
+                    <td class="text-center">{{detalle.descuento}}%</td>
+                {% else %}
+                    <td class="text-center">{{detalle.descuento_manual}}</td>
+                {% endif %}
+                <td style="text-align: right;">{{detalle.precio_total}}</td>
+            </tr>
+            {% endfor %}
+            <tr style="border-top: 1px solid black; padding-top: 4px;">
+                <td colspan="5"></td>
+                <td colspan="1"><b>SUBTOTAL</b></td>
+                <td style="text-align: right">{{ subtotal }}</td>
+            </tr>
+            <tr style="padding-top: 0px;">
+                <td colspan="5"></td>
+                <td colspan="1"><b>IGV 18%</b></td>
+                <td style="text-align: right">{{ igv|floatformat:2 }}</td>
+            </tr>
+            <tr style="padding-top: 0px;">
+                <td colspan="5"></td>
+                <td colspan="1"><b>TOTAL A PAGAR</b></td>
+                <td style="text-align: right">{{ precio_total|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>
+        <br>
+        <b>OBS: </b> {{ cotizacion.observacion }}<br><br>
+        <b>SON: </b>
+        {% if cotizacion.proforma.moneda|stringformat:"s" == 'Soles' %} 
+        {{ precio_total_words_integer }}  con {{ precio_total|floatformat:2|stringformat:"s"|slice:"-2:"}}/100 soles<br><br>
+        {% else %}
+        {{ precio_total_words_integer }}  con {{ precio_total|floatformat:2|stringformat:"s"|slice:"-2:"}}/100 dolares americanos<br><br>
+        {% endif %}
+    </p>
+    <br>
+    <br>
+    <table >
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                <th></th>
+                </th>
+            </tr>
+            <tr>
+                <th style="width: 50%;"><img src="{% static 'imgPiezas/cuentasobraymantenimiento.jpg' %}" alt="Cuenta"></th>
+                <th>
+                <th style="width: 30%; text-align: left;"><img src="{% static 'imgPiezas/firma.jpg' %}"></th>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <div id="footer_content">
+        <table>
+        <tr>
+            <th>PERUKATER EIRL</th>
+        </tr>
+        <tr>
+            <th>RUC : 20602138845</th>
+        </tr>
+        <tr>
+            <th>Dirección Principal: Asoc. Pro Vivienda San Lázaro H12 ASA referencia camino a Villa Ecológica
+            </th>
+            </tr>
+
+        </table>
+    </div>
+</body>
+
+</html>

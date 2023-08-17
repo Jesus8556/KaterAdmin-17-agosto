@@ -1,0 +1,127 @@
+{% extends 'index.html' %}
+{% block content %}
+
+<div class="container">
+    <h1>Orden de Proforma</h1>
+
+    <form method="post" id="formulario_nueva_proforma">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="fecha">Fecha O/P:</label>
+            <div class="input-group">
+                <input type="date" class="form-control" id="fecha" name="fecha" value="{{ proforma.fecha|date:'Y-m-d' }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="setToday">
+                        <i></i> Hoy
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="bu">BU:</label>
+            <select class="form-control" id="bu" name="bu">
+                
+                <option value="{{ bu_diagnostico_mantenimiento.id }}" {% if bu_diagnostico_mantenimiento.id == proforma.bu_diagnostico_mantenimiento.id %} selected{% endif %}>{{ bu_diagnostico_mantenimiento.bu }}</option>
+                
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="condicion_pago">Condicion Pago:</label>
+            <select class="form-control" id="condicion_pago" name="condicion_pago">
+                {% for pago in lista_pago %}
+                    <option value="{{ pago.id }}" {% if pago.id == proforma.condicion_pago.id %}selected{% endif %}>{{ pago.condicion }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="moneda">Moneda:</label>
+            <select class="form-control" id="moneda" name="moneda">
+                {% for moneda in lista_moneda %}
+                    <option value="{{ moneda.id }}" {% if moneda.id == proforma.moneda.id %}selected{% endif %}>{{ moneda.tipo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="validez">Validez:</label>
+            <input type="text" class="form-control" id="validez" name="validez" value="{{ proforma.validez }}">
+        </div>
+        <div class="form-group">
+            <label for="vendedor">Vendedor:</label>
+            <select class="form-control" id="vendedor" name="vendedor">
+                {% for vendedor in lista_vendedor %}
+                    <option value="{{ vendedor.id }}" {% if vendedor.id == proforma.vendedor.id %}selected{% endif %}>{{ vendedor.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="actividad">Actividad:</label>
+            <input type="text" class="form-control" id="actividad" name="actividad" value="{{ proforma.actividad }}">
+        </div>
+        <div class="form-group">
+            <label for="observacion">OBS:</label>
+            <input type="text" class="form-control" id="observacion" name="observacion" value="{{ proforma.observacion }}">
+        </div>
+        
+        <input type="hidden" name="return_url" value="{{ return_url }}">
+        <button type="submit" class="btn btn-primary" >Guardar</button>
+        <a href="{% url 'proforma' %}" class="btn btn-secondary">Volver</a>
+    </form>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaInput = document.getElementById('fecha');
+        const validezInput = document.getElementById('validez');
+        const setTodayButton = document.getElementById('setToday');
+
+        setTodayButton.addEventListener('click', function() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            fechaInput.value = formattedDate;
+            updateValidez();
+        });
+
+        fechaInput.addEventListener('change', function() {
+            updateValidez();
+        });
+
+        function updateValidez() {
+            const selectedDate = new Date(fechaInput.value);
+            if (!isNaN(selectedDate)) {
+                const newDate = new Date(selectedDate);
+                newDate.setMonth(selectedDate.getMonth() + 1);
+
+                // Ajustar el día para no exceder el último día del mes
+                const lastDayOfMonth = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0).getDate();
+                const newDay = Math.min(selectedDate.getDate()+1, lastDayOfMonth);
+
+                newDate.setDate(newDay);
+
+                const newYear = newDate.getFullYear();
+                const newMonth = (newDate.getMonth() + 1).toString().padStart(2, '0');
+                const newFormattedDate = `${newDay}/${newMonth}/${newYear}`;
+                validezInput.value = newFormattedDate;
+            }
+        }
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

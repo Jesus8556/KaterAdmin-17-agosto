@@ -1,0 +1,74 @@
+{% extends 'index.html' %} 
+{% block content %}
+{% load crispy_forms_tags %}
+<style>
+  /* Estilos personalizados */
+  .container {
+    background-color: #f2f2f2;
+    padding: 20px;
+    border-radius: 5px;
+  }
+
+  h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    font-weight: bold;
+  }
+
+  input[type="text"],
+  input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .btn-volver {
+    background-color: #ccc;
+    color: #333;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="container">
+  <h1>Editar Mano de Obra</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ formManodeObra | crispy }}  <!-- Asegúrate de utilizar formCliente aquí -->
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{% url 'manodeobra' %}" class="btn btn-volver">Volver</a>
+  </form>
+
+</div>
+
+{% endblock %}

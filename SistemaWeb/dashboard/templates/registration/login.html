@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Inicio de Sesión</title>
+    <!-- Agregar Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+
+    </style>
+</head>
+
+<body>
+    {% load crispy_forms_tags %}
+    <section class="vh-100">
+        <div class="container py-5 h-100">
+            <div class="row d-flex align-items-center justify-content-center h-100">
+                <div class="col-md-8 col-lg-7 col-xl-6">
+                    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<lottie-player src="https://lottie.host/5a3c8509-e9ee-407b-9a7d-376ea0aecc52/9akTEX4mig.json"  background="transparent"  speed="1"  style="width: 500px; height: 500px;"  loop  autoplay></lottie-player>
+                </div>
+                <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+                    <h2>Inicia Sesion Aqui!</h2>
+                    <form action="#" method="POST">
+                        {% csrf_token %}
+                        {{ form | crispy }}
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">Iniciar Sesion</button>
+
+                        <div class="divider d-flex align-items-center my-4">
+                            <p class="text-center fw-bold mx-3 mb-0 text-muted">OR</p>
+                            <a href="{% url 'password_reset' %}">Forgot password?</a>
+                        </div>
+
+                        <a class="btn btn-primary btn-lg btn-block" style="background-color: #3b5998"
+                            href="{% url 'registro' %}" role="button">
+                            <i class="fab fa-facebook-f me-2"></i>Registrate 
+                        </a>
+                        
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</body>

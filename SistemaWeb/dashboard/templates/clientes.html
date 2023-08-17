@@ -1,0 +1,222 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Clientes Registrados</h1>
+    <p class="mb-4">Aqui encontrara informacion en base al cliente que se registro correctamente </p>
+    <a href="{% url 'nuevo_cliente' %}" class="btn btn-primary btn-icon-split">
+        <span class="icon text-white-50">
+            <i class="fas fa-flag"></i>
+        </span>
+        <span class="text">Nuevo Cliente</span>
+    </a>
+    <br>
+    <br>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Opciones</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Atencion</th>
+                            <th>Cliente</th>
+                            <th>RUC-DNI</th>
+                            <th>Telefono</th>
+                            <th>Correo</th>
+                            <th>Direccion</th>
+                            <th>Observacion</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for cliente in clientes %}
+                        <tr>
+
+                            <td>{{cliente.atencion}}</td>
+                            <td>{{cliente.cliente}}</td>
+                            <td>{{cliente.ruc_dni}}</td>
+                            <td>{{cliente.telefono}}</td>
+                            <td>{{cliente.correo}}</td>
+                            <td>
+                                {% for direccion in cliente.get_direcciones %}
+                                {{ direccion.direccion }}<br>
+                                {% empty %}
+                                Sin direcciones
+                                {% endfor %}
+                                <!-- Icono para añadir dirección -->
+                                <a href="{% url 'agregar_direccion' %}" class="btn btn-success btn-circle add-direccion"
+                                    data-cliente-id="{{ cliente.id }}">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </td>
+                            <td>{{cliente.obs}}</td>
+                            <td>
+                                <!-- Icono para editar -->
+                                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn-warning btn-circle">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <!-- Icono para eliminar -->
+                                <a href="{% url 'eliminar_cliente' cliente.id %}"
+                                    class="btn btn-danger btn-circle eliminar-cliente">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+
+
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="direccionModal" tabindex="-1" role="dialog" aria-labelledby="direccionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="direccionModalLabel">Añadir Dirección</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulario para añadir dirección -->
+                    <form id="direccionForm">
+                        {% csrf_token %}
+                        <input type="hidden" id="clienteId" name="clienteId" value="">
+                        <div class="form-group">
+                            <label for="direccion">Dirección:</label>
+                            <input type="text" class="form-control" id="direccion" name="direccion" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Añadir Dirección</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        // Al hacer clic en el botón de mostrar observación
+        $(".show-obs-modal").click(function () {
+            // Obtener la observación del cliente desde el atributo data-cliente-obs
+            var observacion = $(this).data("cliente-obs");
+
+            // Mostrar la observación del cliente en el modal
+            $("#obsModalBody").text(observacion);
+
+            // Abrir el modal
+            $("#obsModal").modal("show");
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Función para manejar el clic en el botón de eliminar
+        $('.eliminar-cliente').click(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+            // Mostrar cuadro de diálogo de confirmación antes de eliminar
+            if (confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
+                // Obtener la URL de eliminación del vendedor desde el atributo "href" del enlace
+                var url = $(this).attr('href');
+
+                // Enviar la solicitud AJAX para eliminar el vendedor
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',  // Incluir el token CSRF en la solicitud
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        // Si la eliminación fue exitosa, actualizamos la tabla eliminando la fila
+                        $(event.target).closest('tr').remove();
+                        alert(data.message); // Mostrar un mensaje de éxito
+                    },
+                    error: function (error) {
+                        console.log(error); // Mostrar cualquier error en la consola
+                        alert('Error al eliminar el cliente'); // Mostrar un mensaje de error
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Función para manejar el clic en el botón de añadir dirección
+        $('.add-direccion').click(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+            // Obtener el ID del cliente desde el atributo "data-cliente-id"
+            var clienteId = $(this).data('cliente-id');
+
+            // Establecer el valor del campo oculto en el formulario modal
+            $('#clienteId').val(clienteId);
+
+            // Abrir el modal de dirección
+            $('#direccionModal').modal('show');
+        });
+
+        // Enviar el formulario de dirección por AJAX
+        $('#direccionForm').submit(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del formulario
+
+            // Obtener los datos del formulario
+            var clienteId = $('#clienteId').val();
+            var direccion = $('#direccion').val();
+
+            // Enviar la solicitud AJAX para agregar la dirección
+            $.ajax({
+                type: 'POST',
+                url: '{% url "agregar_direccion" %}',  // Cambia la URL a la vista que agrega direcciones
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'cliente_id': clienteId,
+                    'direccion': direccion,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    alert(data.message);
+                    window.location.reload();  // Forzar la recarga de la página
+                }
+                ,
+                error: function (error) {
+                    console.log(error);
+                    alert('Error al agregar la dirección');
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+            }
+        });
+    });
+</script>
+
+
+{% endblock %}

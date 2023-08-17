@@ -1,0 +1,329 @@
+{% extends 'index.html' %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container-fluid">
+    <h1>Detalle de Cotización</h1>
+
+    <h2>Orden de Proforma</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Proforma</th>
+                <th>Fecha de Proforma</th>
+                <th>BU</th>
+                <th>Condición Pago</th>
+                <th>Moneda</th>
+                <th>Validez de O/P</th>
+                <th>Vendedor</th>
+                <th>Correo</th>
+                <th>Celular</th>
+                <th>Actividad</th>
+                <th>Observaciones</th>
+                <!-- Agrega aquí otros campos de la tabla de Proforma -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ cotizacion.proforma }}</td>
+                <td>{{ cotizacion.proforma.fecha }}</td>
+                <td>{{ cotizacion.proforma.bu }}</td>
+                <td>{{ cotizacion.proforma.condicion_pago }}</td>
+                <td>{{ cotizacion.proforma.moneda }}</td>
+                <td>{{ cotizacion.proforma.validez }}</td>
+                <td>{{ cotizacion.proforma.vendedor }}</td>
+                <td>{{ cotizacion.proforma.correo }}</td>
+                <td>{{ cotizacion.proforma.celular }}</td>
+                <td>{{ cotizacion.proforma.actividad }}</td>
+                <td>{{ cotizacion.proforma.observacion }}</td>
+                <!-- Agrega aquí otros campos de la tabla de Proforma -->
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>{{ cotizacion.proforma }}</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Atencion</th>
+                <th>Cliente</th>
+                <th>Direcciones</th>
+                <th>RUC-DNI</th>
+                <th>Telefono</th>
+                <th>Correo</th>
+                <th>Observacion</th>
+                <!-- Agrega aquí otros campos de la tabla de Cliente -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{cotizacion.cliente.atencion}}</td>
+                <td>{{cotizacion.cliente.cliente}}</td>
+                <td>
+                    {% for direccion in cotizacion.cliente.get_direcciones %}
+                    {{ direccion.direccion }}<br>
+                    {% empty %}
+                    Sin direcciones
+                    {% endfor %}
+                </td>
+                <td>{{cotizacion.cliente.ruc_dni}}</td>
+                <td>{{cotizacion.cliente.telefono}}</td>
+                <td>{{cotizacion.cliente.correo}}</td>
+                <!-- Agrega aquí otros campos de la tabla de Cliente -->
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <br>
+
+
+
+    <!-- Formulario para agregar detalles -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="col-xl-12 col-md-6 mb-8">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+
+            </div>
+        </div>
+        <div class="my-4"></div>
+        <div class="row">
+            <!-- Columna de la izquierda (Tabla) -->
+            <div class="col-md-6">
+
+                <div class="card shadow mb-8">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Descripcion</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>item</th>
+                                        <th>cantidad</th>
+                                        <th>Codigo</th>
+                                        <th>Descripcion</th>
+                                        <th>p_unitario</th>
+                                        <th>Descuento</th>
+                                        <th>Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for detalleConsultoria in detallesConsultoria %}
+                                    <!-- Contenido de la tabla -->
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ detalleConsultoria.cantidad}}</td>
+                                        <td>{{detalleConsultoria.codigo}}</td>
+                                        <td>{{detalleConsultoria.descripcion}}</td>
+                                        {% if cotizacion.proforma.moneda|stringformat:"s" == 'Soles' %}
+                                            <td>S/.{{detalleConsultoria.precio_unitario}}</td>
+                                        {% else %}
+                                        <td>$.{{detalleConsultoria.precio_unitario}}</td>
+                                        {% endif %}
+                                        <td>{{detalleConsultoria.descuento}}%</td>
+                                        {% if cotizacion.proforma.moneda|stringformat:"s" == 'Soles' %}
+                                            <td>S/.{{ detalleConsultoria.precio_total }}</td>
+                                        {% else %}
+                                        <td>$.{{ detalleConsultoria.precio_total }}</td>
+                                        {% endif %}
+                                        <td>
+
+                                            <a href="{% url 'editar_detalle_consultoria' pk=cotizacion.pk detalle_id=detalleConsultoria.id %}"
+                                                class="btn btn-warning btn-circle">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <!-- Icono para eliminar -->
+                                            <a href="{% url 'eliminar_detalle_consultoria' detalleConsultoria.id %}"
+                                                class="btn btn-danger btn-circle eliminar-detalle-consultoria">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                            
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna de la derecha (Formulario) -->
+
+            <div class="col-md-6">
+                {{ form.media.css}}
+                <style>
+                    input,
+                    select {
+                        width: 100%
+                    }
+                </style>
+                <!-- Formulario para agregar detalles -->
+
+                <h2>{% if form.instance.pk %}Editar detalle{% else %}Agregar nuevo dato{% endif %}</h2>
+                <form method="post" class="detalle-form">
+                    {% csrf_token %}
+                    {{ form | crispy }}
+                    <button type="submit" class="btn btn-primary">Guardar Detalles</button>
+                    <a href="{% url 'cotizacionconsultoria' %}" class="btn btn-secondary">Volver</a>
+                </form>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                {{ form.media.js }}
+
+
+            </div>
+            <div class="col-md-6">
+                <div class="my-2"></div>
+                <a href="{% url 'generar_pdf_consultoria' pk=cotizacion.pk %}" class="btn btn-info btn-icon-split">
+                    <span class="icon text-white-50">
+                        <i class="fas fa-download"></i>
+                    </span>
+                    <span class="text">Visualizar PDF</span>
+                </a>
+        </div>
+        </div>
+    </div>
+
+</div>
+<!-- Agregar este script al final del template -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $('#conversion-form').on('submit', function (event) {
+            event.preventDefault();
+            // Obtener el valor del dólar en soles del campo oculto del formulario
+            var penRate = parseFloat($('[name="pen_rate"]').val());
+
+            // Recorrer cada fila de la tabla y convertir el precio unitario a dólares
+            $('#dataTable tbody tr').each(function () {
+                var precioUnitarioSoles = parseFloat($(this).find('td:eq(4)').text());
+                var precioUnitarioDolares = (precioUnitarioSoles / penRate).toFixed(2);
+                // Actualizar el valor del precio unitario en la tabla con el valor en dólares
+                $(this).find('td:eq(4)').text(precioUnitarioDolares);
+            });
+            $('#convertir-dolares-btn').prop('disabled', true);
+            $('#guardar-conversion-btn').removeClass('d-none');
+            $('#convertir-dolares-btn').addClass('d-none');
+        });
+        //boton guardar conversion
+        $('#guardar-conversion-btn').on('click', function () {
+            // Mostrar el SweetAlert2 para confirmar los cambios
+            $('#guardar-conversion-btn').on('click', function () {
+                // Mostrar el SweetAlert2 para confirmar los cambios
+                Swal.fire({
+                    title: 'Estás seguro?',
+                    text: 'La conversion a dolares de guardara permanentemente',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Revertir',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Aquí puedes agregar el código para guardar los cambios en el servidor (si es necesario)
+
+                        // Deshabilitar el botón de "Guardar conversión" después de guardar
+                        $(this).prop('disabled', true);
+                    } else {
+                        // Aquí puedes agregar el código para revertir los cambios
+                        // Puedes recargar la página para volver a mostrar los valores originales
+                        location.reload();
+                    }
+                });
+            });
+        });
+
+
+        $('.js-example-basic-single').select2({
+            placeholder: 'Select an option'
+        });
+
+
+
+
+
+        // Función para manejar el clic en el botón de eliminar
+        $('.eliminar-detalle-consultoria').click(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+            // Mostrar cuadro de diálogo de confirmación antes de eliminar
+            if (confirm('¿Estás seguro de que deseas eliminar?')) {
+                // Obtener la URL de eliminación del detalle desde el atributo "href" del enlace
+                var url = $(this).attr('href');
+
+                // Guardar la referencia al elemento <tr> actual para eliminarlo después de la respuesta
+                var fila = $(this).closest('tr');
+
+                // Enviar la solicitud AJAX para eliminar el detalle
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',  // Incluir el token CSRF en la solicitud
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        // Si la eliminación fue exitosa, eliminar la fila de la tabla
+                        fila.remove();
+                        alert(data.message);
+                        $('#dataTable tbody tr').each(function (index) {
+                            $(this).find('td:eq(0)').text(index + 1);
+                        }); // Mostrar un mensaje de éxito
+                    },
+                    error: function (error) {
+                        console.log(error); // Mostrar cualquier error en la consola
+                        alert('Error al eliminar'); // Mostrar un mensaje de error
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        var descuentoTipoField = $('[name="descuento_tipo"]');
+        var descuentoField = $('[name="descuento"]').closest('.form-group');
+        var descuentoManualField = $('[name="descuento_manual"]').closest('.form-group');
+
+        function toggleDescuentoFields() {
+            if (descuentoTipoField.filter(':checked').val() === 'manual') {
+                descuentoField.hide();
+                descuentoManualField.show();
+            } else {
+                descuentoField.show();
+                descuentoManualField.hide();
+            }
+        }
+
+        toggleDescuentoFields();  // Inicialmente ocultar o mostrar según el valor actual
+        descuentoTipoField.change(toggleDescuentoFields);
+
+        // Resto de tu código JavaScript
+    });
+</script>
+{% endblock %}

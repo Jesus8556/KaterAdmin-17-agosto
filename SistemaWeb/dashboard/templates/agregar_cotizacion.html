@@ -1,0 +1,51 @@
+{% extends 'index.html' %}
+{% block content %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container-fluid">
+    {% if cotizacion %}
+    <h1>Editar Cotización</h1>
+    {% else %}
+    <h1>Agregar Cotización</h1>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="proforma">Proforma:</label>
+            <select class=" form-control js-example-basic-multiple" id="proforma" name="proforma" >
+                <option value="" selected>Selecciona una proforma...</option> <!-- Agrega una opción por defecto -->
+                {% for proforma in lista_proformas %}
+                <option value="{{ proforma.id }}" {% if proforma.id == cotizacion.proforma.id %}selected{% endif %}>{{ proforma }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="cliente">Cliente:</label>
+            <select class="form-control" id="cliente" name="cliente">
+                {% for cliente in lista_clientes %}
+                <option value="{{ cliente.id }}" {% if cliente.id == cotizacion.cliente.id %}selected{% endif %}>{{ cliente }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="observacion">Observacion:</label>
+            <input type="text" class="form-control" id="observacion" name="observacion" value="{{ cotizacion.observacion }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'cotizacion' %}" class="btn btn-secondary">Volver</a>
+    </form>
+</div>
+<script>
+    $(document).ready(function() {
+        $('.js-example-basic-multiple').select2({
+            minimumInputLength: 1, // Solo muestra resultados después de ingresar al menos un carácter
+            placeholder: 'Escribe para buscar una proforma...', // Mensaje en el campo de búsqueda
+            allowClear: true, // Permite borrar la selección
+        });
+    });
+</script>
+
+    
+{% endblock %}

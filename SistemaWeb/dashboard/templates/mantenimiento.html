@@ -1,0 +1,159 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.imagen-tienda {
+    width: 100px; /* Cambia el valor según tus necesidades */
+    height: auto; /* Ajusta la altura automáticamente según el ancho */
+}
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Piezas y Repuestos </h1>
+    <p class="mb-4">Informacion de los productos del apartado (Mantenimiento) </p>
+    <a href="{% url 'nuevo_mantenimiento' %}" class="btn btn-primary btn-icon-split">
+        <span class="icon text-white-50">
+            <i class="fas fa-flag"></i>
+        </span>
+        <span class="text">Nuevo producto</span>
+    </a>
+    <br>
+    <br>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Opciones</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Codigo</th>
+                            <th>Nombre</th>
+                            <th>Observacion</th>
+                            <th>Marca</th>
+                            <th>Imagen</th>
+                            <th>Precio</th>
+                            <th>Tipo_moneda</th>
+                            <th>Peso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+                        
+                        {% for mantenimiento in mantenimientos %}
+                        <tr>
+                            
+                            <td>{{mantenimiento.codigo}}</td>
+                            <td>{{mantenimiento.nombre}}</td>
+                            <td>{{mantenimiento.observacion}}</td>
+                            <td>{{mantenimiento.marca}}</td>
+                            <td>
+                                {% if mantenimiento.imagen_tienda %}
+                                <img src="{{ mantenimiento.imagen_tienda.url }}" alt="Imagen" class="imagen-tienda">
+                                {% endif %} 
+                            </td>
+                            {% if mantenimiento.tipo_moneda.tipo == 'Soles' %}
+                                <td>S/.{{mantenimiento.precio_unitario}}</td>
+                            {% else %}
+                            <td>$.{{mantenimiento.precio_unitario}}</td>
+                            
+                            {% endif %}
+                            <td>{{mantenimiento.tipo_moneda}}</td>
+                            <td>{{mantenimiento.peso}}</td>
+                            
+                            
+                            <td>
+                                <!-- Icono para editar -->
+                                <a href="{% url 'editar_mantenimiento' mantenimiento.id %}" class="btn btn-warning btn-circle">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <!-- Icono para eliminar -->
+                                <a href="{% url 'eliminar_mantenimiento' mantenimiento.id %}"
+                                    class="btn btn-danger btn-circle eliminar-mantenimiento">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                            
+                         
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+      // Al hacer clic en el botón de mostrar observación
+      $(".show-obs-modal").click(function() {
+        // Obtener la observación del cliente desde el atributo data-cliente-obs
+        var observacion = $(this).data("cliente-obs");
+  
+        // Mostrar la observación del cliente en el modal
+        $("#obsModalBody").text(observacion);
+  
+        // Abrir el modal
+        $("#obsModal").modal("show");
+      });
+    });
+  </script>
+
+<script>
+    $(document).ready(function () {
+        // Función para manejar el clic en el botón de eliminar
+        $('.eliminar-mantenimiento').click(function (event) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+
+            // Mostrar cuadro de diálogo de confirmación antes de eliminar
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                // Obtener la URL de eliminación del vendedor desde el atributo "href" del enlace
+                var url = $(this).attr('href');
+
+                // Enviar la solicitud AJAX para eliminar el vendedor
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',  // Incluir el token CSRF en la solicitud
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        // Si la eliminación fue exitosa, actualizamos la tabla eliminando la fila
+                        $(event.target).closest('tr').remove();
+                        alert(data.message); // Mostrar un mensaje de éxito
+                    },
+                    error: function (error) {
+                        console.log(error); // Mostrar cualquier error en la consola
+                        alert('Error al eliminar el producto'); // Mostrar un mensaje de error
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json"
+            }
+        });
+    });
+</script>
+
+
+
+
+
+{% endblock %}
